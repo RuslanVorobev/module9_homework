@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title></title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="">
+</head>
+
+<body>
+    <form action="#" onsubmit="return submitHandler()">
+        <input id="picNumber" type="number" required min="1" max="10">
+        <button type="submit">Submit</button>
+    </form>
+
+    <div id="imagesHolder">
+
+    </div>
+
+    <script>
+        function submitHandler() {
+            imagesHolder.innerHTML = "";
+            imagesHolder.textContent = "Спрашиваем..."
+
+            let request = new XMLHttpRequest();
+            request.open('GET', `https://picsum.photos/v2/list/?limit=${picNumber.value}`);
+
+            request.onload = () => {
+                if (request.status == 200) {
+                    let responseJson = JSON.parse(request.response);
+                    let imagesHtml = "";
+                    responseJson.forEach(element => {
+                        imagesHtml += `<img src="${element.download_url}" alt="${element.author}" style="width: 300px;" >`;
+                    });
+                    imagesHolder.innerHTML = imagesHtml;
+                }
+                else {
+                    imagesHolder.textContent = "Нишмагла загрузить картинок";
+                }
+            };
+
+            request.onerror = () => {
+                imagesHolder.textContent = "Запрос не прошел";
+            };
+
+            request.send();
+
+            return false;
+        }
+    </script>
+</body>
+
+</html>

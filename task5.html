@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title></title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="">
+</head>
+
+<body>
+    <form action="#" onsubmit="return submitHandler()">
+        <label for="pageNumInput">Номер страницы</label>
+        <input id="pageNumInput" type="number" required">
+        <label for="limitInput">Лимит</label>
+        <input id="limitInput" type="number" required">
+        <button type="submit">Запрос</button>
+    </form>
+
+    <div id="imagesHolder">
+
+    </div>
+
+    <script>
+        function submitHandler() {
+            imagesHolder.innerHTML = "";
+
+            let pageNum = +pageNumInput.value;
+            let limit = +limitInput.value;
+            
+            let isPageNumInvalid = isNaN(pageNum) || pageNum < 1 || pageNum > 10;
+            let isLimitInvalid = isNaN(limit) || limit < 1 || limit > 10;
+
+            if (isPageNumInvalid && isLimitInvalid) {
+                imagesHolder.textContent = "Номер страницы и лимит вне диапазона от 1 до 10"
+                return false;
+            } else if (isPageNumInvalid) {
+                imagesHolder.textContent = "Номер страницы вне диапазона от 1 до 10"
+                return false;
+            } else if (isLimitInvalid) {
+                imagesHolder.textContent = "Лимит вне диапазона от 1 до 10"
+                return false;
+            }
+
+            imagesHolder.textContent = "Спрашиваем..."
+
+            fetch(`https://picsum.photos/v2/list?page=${pageNum}&limit=${limit}`)
+                .then(response => response.json())
+                .then(data => { 
+                    let imagesHtml = "";
+                    data.forEach(element => {
+                        imagesHtml += `<img src="${element.download_url}" alt="${element.author}" style="width: 300px;" >`;
+                    });
+                    imagesHolder.innerHTML = imagesHtml;
+
+                    localStorage.setItem("task5__last-parameters", JSON.stringify({ pageNum: pageNum, limit: limit }));
+                    localStorage.setItem("task5__last-result", imagesHtml);
+                })
+                .catch(() => { 
+                    imagesHolder.textContent = "Запрос не прошел"; 
+                });
+
+            return false;
+        }
+
+        document.addEventListener("DOMContentLoaded", function(){
+            let params = localStorage.getItem("task5__last-parameters");
+            if (params != null)
+            {
+                params = JSON.parse(params);
+                pageNumInput.value = params.pageNum;
+                limitInput.value = params.limit;
+            }
+            let imagesHtml = localStorage.getItem("task5__last-result");
+            if (imagesHtml != null)
+            {
+                imagesHolder.innerHTML = imagesHtml;
+            }
+            else
+            {
+                imagesHolder.textContent = "Здесь могли бы быть картинки"; 
+            }
+        })
+    </script>
+</body>
+
+</html>
